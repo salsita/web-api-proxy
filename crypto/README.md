@@ -1,0 +1,1 @@
+Place key pair for request signing here (public key must be in `key.pub`).
