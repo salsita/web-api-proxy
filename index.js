@@ -16,7 +16,17 @@ app.use('/', (req, res) => {
   // sign the hostname with ```openssl dgst -sha1 -sign key.pem | base64```
   let signature = req.headers['x-proxy-authorization'];
   let verify = crypto.createVerify('RSA-SHA1');
-  let publicKey = fs.readFileSync('./crypto/key.pub');
+  let publicKey;
+  if (fs.exists('./crypto/key.pub')) {
+    publicKey = fs.readFileSync('./crypto/key.pub');
+  }
+  else {
+    publicKey = process.env['WEB_API_PROXY_PUBLIC_KEY'];
+  }
+  if (!publicKey) {
+    return res.status(500).
+      send('Public key not found in crypto/key.pub or WEB_API_PROXY_PUBLIC_KEY environment variable\n');
+  }
   verify.update(apiServerHost + '\n');
   if (!signature) {
     return res.status(403).send('Missing signature\n');
