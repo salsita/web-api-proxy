@@ -22,6 +22,8 @@ openssl rsa -pubout -in crypto/key.pem -out crypto/key.pub
 
 If you are deploying in an environment where you can't easily modify the file system (e.g. Heroku) you can also set the environment variable `WEB_API_PROXY_PUBLIC_KEY` to the public key text.
 
+(If you are using Heroku, you might want to [set the config variable from the command-line](http://stackoverflow.com/questions/6942600/multi-line-config-variables-in-heroku) if you have trouble getting the web interface to access a multiline value.)
+
 ### Running the server
 
 The server code uses ECMAScript 6. You can run it in Node 0.12.x or greater using:
