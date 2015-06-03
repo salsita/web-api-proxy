@@ -25,6 +25,7 @@ app.use('/', (req, res) => {
   let signature = req.headers['x-proxy-authorization'];
   let verify = crypto.createVerify('RSA-SHA1');
   verify.update(apiServerHost + '\n');
+  console.log('Authorizing ' + apiServerHost + ' with ' + signature);
   if (!signature) {
     return res.status(403).send('Missing signature\n');
   }
@@ -34,7 +35,7 @@ app.use('/', (req, res) => {
 
   // retrieve request parameters from the environment
   let parsedUrl = url.parse(apiServerHost + req.url, true);
-  let hostPrefix = parsedUrl.hostname.replace(/\./, '_', 'g').toUpperCase();
+  let hostPrefix = parsedUrl.hostname.replace(/\./g, '_').toUpperCase();
 
   for (let key in parsedUrl.query) {
     let value = parsedUrl.query[key];
