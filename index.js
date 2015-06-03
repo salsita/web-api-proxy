@@ -6,6 +6,14 @@ let fs = require('fs');
 
 let app = express();
 
+let publicKey = fs.existsSync('./crypto/key.pub') ?
+  fs.readFileSync('./crypto/key.pub') :
+  process.env['WEB_API_PROXY_PUBLIC_KEY'];
+
+if (!publicKey) {
+  throw 'Public key not found in crypto/key.pub or WEB_API_PROXY_PUBLIC_KEY environment variable';
+}
+
 app.use('/', (req, res) => {
   let apiServerHost = req.headers['x-api-server-host'];
   if (!apiServerHost) {
@@ -13,20 +21,9 @@ app.use('/', (req, res) => {
   }
 
   // check that the authorization header contains a signature for the host
-  // sign the hostname with ```openssl dgst -sha1 -sign key.pem | base64```
+  // sign the hostname with `openssl dgst -sha1 -sign key.pem | base64`
   let signature = req.headers['x-proxy-authorization'];
   let verify = crypto.createVerify('RSA-SHA1');
-  let publicKey;
-  if (fs.exists('./crypto/key.pub')) {
-    publicKey = fs.readFileSync('./crypto/key.pub');
-  }
-  else {
-    publicKey = process.env['WEB_API_PROXY_PUBLIC_KEY'];
-  }
-  if (!publicKey) {
-    return res.status(500).
-      send('Public key not found in crypto/key.pub or WEB_API_PROXY_PUBLIC_KEY environment variable\n');
-  }
   verify.update(apiServerHost + '\n');
   if (!signature) {
     return res.status(403).send('Missing signature\n');
@@ -53,6 +50,8 @@ app.use('/', (req, res) => {
     }
     parsedUrl.search = null;
   }
+
+  // remove our HTTP headers and proxy the request
   let proxiedRequest = req.pipe(request(url.format(parsedUrl)));
   proxiedRequest.removeHeader('x-api-server-host');
   proxiedRequest.removeHeader('x-proxy-authorization');
