@@ -4,7 +4,7 @@
   "description": "Proxy any request to a remote web API to avoid embedding secret keys in your client-side app",
   "main": "index.js",
   "scripts": {
-    "start": "node --harmony --use_strict index.js"
+    "start": "node --harmony index.js"
   },
   "author": "Matthew Gertner",
   "license": "MIT",

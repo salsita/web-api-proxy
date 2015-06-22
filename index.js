@@ -1,3 +1,5 @@
+"use strict";
+
 let express = require('express');
 let request = require('request');
 let url = require('url');
@@ -25,7 +27,6 @@ app.use('/', (req, res) => {
   let signature = req.headers['x-proxy-authorization'];
   let verify = crypto.createVerify('RSA-SHA1');
   verify.update(apiServerHost + '\n');
-  console.log('Authorizing ' + apiServerHost + ' with ' + signature);
   if (!signature) {
     return res.status(403).send('Missing signature\n');
   }
@@ -45,6 +46,7 @@ app.use('/', (req, res) => {
       let envName = hostPrefix + '_' + key.toUpperCase() + '_' + value.substring(1, len-1);
       let envValue = process.env[envName];
       if (!envValue) {
+        console.error('No value for environment variable: ' + envName);
         return res.status(500).send('No value for environment variable: ' + envName + '\n');
       }
       parsedUrl.query[key] = envValue;
